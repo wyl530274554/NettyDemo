@@ -2,23 +2,25 @@ package com.melon;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
+import io.netty.channel.SimpleChannelInboundHandler;
 
-public class HelloNettyServerHandler extends ChannelInboundHandlerAdapter {
+/**
+ * SimpleChannelInboundHandler不需要释放msg，它内部自动处理
+ * ChannelInboundHandlerAdapter不能调用super.channelRead()，而且需要手动调用方法释放msg
+ * ReferenceCountUtil.release(msg);
+ */
+public class HelloNettyServerHandler extends SimpleChannelInboundHandler {
     /**
-     * 不能调用super.channelRead(ctx, msg);
-     * 否则会报io.netty.util.IllegalReferenceCountException: refCnt: 0
+     * 有数据可操作
      */
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf msgBuf = (ByteBuf) msg;
-        while (msgBuf.isReadable()){
-            System.out.print((char)msgBuf.readByte());
+        while (msgBuf.isReadable()) {
+            System.out.print((char) msgBuf.readByte());
             System.out.flush();
         }
         System.out.println();
-        ReferenceCountUtil.release(msg);
     }
 
     @Override

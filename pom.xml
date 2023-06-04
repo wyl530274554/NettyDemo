@@ -6,7 +6,12 @@
 
     <groupId>com.melon</groupId>
     <artifactId>nettydemo</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -16,5 +21,6 @@
         </dependency>
 
     </dependencies>
+
 
 </project>
