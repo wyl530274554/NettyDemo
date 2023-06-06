@@ -14,12 +14,12 @@ public class HelloNettyServer {
     }
 
     private void run() throws Exception {
-        EventLoopGroup boosGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        bootstrap.group(boosGroup, workerGroup)
-                .channel(NioServerSocketChannel.class) //注册server channel类型
-                .childHandler(new ChannelInitializer<SocketChannel>() {
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1); //处理Server Channel所有事件和IO
+        EventLoopGroup workerGroup = new NioEventLoopGroup(); //处理Client Channel所有事件和IO
+        ServerBootstrap bootstrap = new ServerBootstrap(); //启动器
+        bootstrap.group(bossGroup, workerGroup) //指定工作组
+                .channel(NioServerSocketChannel.class) //注册server channel
+                .childHandler(new ChannelInitializer<SocketChannel>() { //注册客户端ChannelHandler
                     /**
                      * 通道注册后调用，每个客户端的连接都会调用一次
                      * @param socketChannel 此次连接的channel
@@ -29,11 +29,11 @@ public class HelloNettyServer {
                         socketChannel.pipeline().addLast(new HelloNettyServerHandler());
                     }
                 })
-                .option(ChannelOption.SO_BACKLOG, 128) //设置全连接队列的大小
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
-        /*端口绑定*/
+                .option(ChannelOption.SO_BACKLOG, 128) //设置server 全连接队列的大小
+                .childOption(ChannelOption.SO_KEEPALIVE, true); //设置client channel TCP参数
+        /*端口绑定、启动服务*/
         ChannelFuture channelFuture = bootstrap.bind(port).sync();
-        /*监听server channel IO操作的结果*/
+        /*为异步IO操作通知接口注册监听器*/
         channelFuture.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -51,7 +51,7 @@ public class HelloNettyServer {
 
         //退出
         workerGroup.shutdownGracefully();
-        boosGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
 
         System.out.println("服务器已关闭");
     }
