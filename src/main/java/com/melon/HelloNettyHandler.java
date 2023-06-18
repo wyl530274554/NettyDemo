@@ -12,6 +12,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 @ChannelHandler.Sharable
 public class HelloNettyHandler extends SimpleChannelInboundHandler {
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("HelloNettyHandler channelActive");
+    }
+
     /**
      * 有数据可操作
      */
