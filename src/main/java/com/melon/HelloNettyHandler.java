@@ -1,6 +1,7 @@
 package com.melon;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -9,7 +10,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * ChannelInboundHandlerAdapter不能调用super.channelRead()，而且需要手动调用方法释放msg
  * ReferenceCountUtil.release(msg);
  */
-public class HelloNettyServerHandler extends SimpleChannelInboundHandler {
+@ChannelHandler.Sharable
+public class HelloNettyHandler extends SimpleChannelInboundHandler {
     /**
      * 有数据可操作
      */
@@ -25,7 +27,24 @@ public class HelloNettyServerHandler extends SimpleChannelInboundHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        System.out.println("exceptionCaught");
         cause.printStackTrace();
         ctx.close();
     }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channelInactive");
+        ctx.close();
+    }
+
+    /**
+     * 客户端连接断开后，会先后调用handler类中的channelInactive和channelUnregistered
+     */
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelUnregistered(ctx);
+        System.out.println("channelUnregistered");
+    }
+
 }
